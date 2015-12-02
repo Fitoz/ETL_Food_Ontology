@@ -119,6 +119,7 @@ public class ETLTest  {
                             titleElement.setText( name );
                             FoodElement.appendElement( titleElement );
                             System.out.println(name);
+                            titleElement.write(this.writer);
                             //this.writer.writeEndElement();
                         }                                           
                         if(tagname.equals("cat")){                           
@@ -131,10 +132,10 @@ public class ETLTest  {
                             catElement.setText(cat);
                             FoodElement.appendElement(catElement);
                             System.out.println(cat);
-                            //this.writer.writeEndElement();
+                            catElement.write(this.writer);
                              
                         }
-                        FoodElement.write(this.writer);
+                        //FoodElement.write(this.writer);
 			// fin del ciclo
 		}                
                 System.out.println("printeando /RDF");
