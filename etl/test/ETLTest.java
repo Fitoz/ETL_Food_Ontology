@@ -1,15 +1,21 @@
 package etl.test;
 
+import org.apache.commons.io.FileUtils;
+
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
 
+import javax.sound.midi.Soundbank;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamConstants;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Scanner;
 
 public class ETLTest  {
@@ -19,7 +25,7 @@ public class ETLTest  {
 	 * @throws FileNotFoundException
 	 * 
 	 */
-        XMLInputFactory inputFactory;
+	XMLInputFactory inputFactory;
 	XMLStreamReader reader;
 	XMLOutputFactory outputFactory;
 	XMLStreamWriter writer; 
@@ -37,22 +43,30 @@ public class ETLTest  {
 	public ETLTest(String inputFilename, String outputFilename) throws XMLStreamException, FileNotFoundException {
 		this.inputFactory = XMLInputFactory.newInstance();
 		this.reader = this.inputFactory.createXMLStreamReader(new FileInputStream(inputFilename), "UTF8");
+		inputFactory.setProperty("javax.xml.stream.isCoalescing", true);
 		this.outputFactory = XMLOutputFactory.newInstance();
 		this.writer = this.outputFactory.createXMLStreamWriter(new FileOutputStream(outputFilename), "UTF8");
 	}
 	public static void main(String args[] ) throws XMLStreamException, FileNotFoundException {
-		System.out.println("Ingrese archivo de entrada y de salida");
+		System.out.println("Ingrese directorio raiz");
 		Scanner scanInput= new Scanner(System.in);
 		String text_in= scanInput.nextLine();
+		System.out.println("Ingrese carpeta para guardar resultados");
 		Scanner scanOutput= new Scanner(System.in);
-		//For string
 		String text_out= scanOutput.nextLine();
-		ETLTest e = new ETLTest(text_in,text_out);
-		e.parseAndWrite();
-		System.out.println("Termino");
+		File dir= new File(text_in);
+		Collection listFiles= FileUtils.listFiles(dir, new String[]{"xml"},true);
+		Iterator fileIterator =listFiles.iterator();
+		int i=0;
+		while (fileIterator.hasNext()){
+			File file= (File) fileIterator.next();
+			ETLTest e = new ETLTest(file.getAbsolutePath(),text_out+"Receta"+i+".rdf");
+			e.parseAndWrite();
+			i++;
+		}
 	}
 	public void writeRDFElement(String prefix, String name, String uri, Element foodElement) throws XMLStreamException {
-		String text = this.reader.getText();
+		String text = this.setBlankAttribute();
 		Element tagElement=new Element();
 		tagElement.setPrefix(prefix);
 		tagElement.setUri(uri);
@@ -67,8 +81,6 @@ public class ETLTest  {
 		foodElement.setUri(uri);
 		foodElement.setElementName(name);
 	}
-        
-
 	/**
 	 * @throws XMLStreamException
 	 * @throws FileNotFoundException
@@ -84,16 +96,16 @@ public class ETLTest  {
 		this.writer.setPrefix("rdf", rdfUri);
 		this.writer.writeStartElement(rdfUri, "RDF");
 		// XML namespaces
-		this.writer.writeNamespace( "dc", dcUri );
-		this.writer.writeNamespace("fo",foUri);
-		this.writer.writeNamespace("ex",exUri);
+		this.writer.writeNamespace("dc", dcUri);
+		this.writer.writeNamespace("fo", foUri);
+		this.writer.writeNamespace("ex", exUri);
 		this.writer.writeNamespace( "dct", dctUri );
 		this.writer.writeNamespace("frbrer", frbrerUri);
 		this.writer.writeNamespace( "rdf", rdfUri );
 		this.writer.writeNamespace("rdfs", rdfsUri);
 		this.writer.writeNamespace("foaf", foafUri);
 
-                
+        boolean hasTitle=false;
 		while(this.reader.hasNext()) {
 			if (this.reader.next() != XMLStreamConstants.START_ELEMENT) continue;
 
@@ -111,7 +123,12 @@ public class ETLTest  {
 					this.writer.writeCharacters("\n");
 					break;
 				case "title":
-					this.writeRDFElement("foaf", "name", foafUri, recipeElement);
+					if (!hasTitle){
+						//hasTitle=true;
+						this.writeRDFElement("foaf", "name", foafUri, recipeElement);
+						hasTitle=true;
+						break;
+					}
 					break;
 				case "cat":
 					this.writeRDFElement("ex", "category", exUri, recipeElement);
@@ -124,23 +141,19 @@ public class ETLTest  {
 					recipeElement.appendElement(ingElement);
 					break;
 				case "qty": {
-					String text = this.reader.getText();
+					String text=setBlankAttribute();
 					ingElement.appendAttribute("fo", "quantity", text);
 					break;
 				}
 				case "unit": {
 					String text;
-					if (this.reader.isStartElement()) {
-						text = this.reader.getText();
-					} else {
-						text = "no unit";
-					}
+					text = setBlankAttribute();
 					ingElement.appendAttribute("fo", "metric_quantity", text);
 					break;
 				}
 				case "item": {
 					//Agrega los items al principio, pero en el xml aparecen al final
-					String text = this.reader.getText();
+					String text = this.setBlankAttribute();
 					Attribute attribute = new Attribute("food", text, "fo");
 					ingElement.getAttributes().add(0, attribute);
 					ingElement.write(this.writer);
@@ -149,11 +162,18 @@ public class ETLTest  {
 					break;
 				}
 				case "step": {
-					String text1 = this.reader.getText();
-					System.out.println(text1);
+					String text = this.setBlankAttribute();
+					while (this.reader.hasNext()){
+						int next = this.reader.next();
+						if (next!= XMLStreamConstants.START_ELEMENT){
+							break;
+						}else {
+							text =text+this.reader.getText();
+						}
+					}
 					Element stepElement = new Element();
 					this.setUriandName("fo", "Step", foUri, stepElement);
-					stepElement.appendAttribute("fo", "Instruction", text1);
+					stepElement.appendAttribute("fo", "Instruction", text);
 					recipeElement.appendElement(stepElement);
 					stepElement.write(this.writer);
 					this.writer.writeCharacters("\n");
@@ -164,6 +184,16 @@ public class ETLTest  {
 		this.writer.writeEndDocument();
 		this.writer.close();
 		this.reader.close();
+	}
+
+	private String setBlankAttribute() {
+		String text;
+		try{
+			text=this.reader.getText();
+		}catch (IllegalStateException e){
+			text="no attribute";
+		}
+		return text;
 	}
 
 }
