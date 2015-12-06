@@ -76,10 +76,7 @@ public class ETLTest  {
 	 */
 	public void parseAndWrite() throws XMLStreamException, FileNotFoundException {
 		String tagname;
-
 		//XMLStreamWriter obraWriter = this.writer.get(0);
-
-                
 		Element recipeElement = new Element();
 		Element ingElement=new Element();
 
@@ -152,7 +149,6 @@ public class ETLTest  {
 					break;
 				}
 				case "step": {
-					//this.writeRDFElement("fo","Step",foUri,recipeElement);
 					String text = this.reader.getText();
 					Element stepElement = new Element();
 					this.setUriandName("fo", "Step", foUri, stepElement);
@@ -164,8 +160,6 @@ public class ETLTest  {
 				}
 			}
 		}
-		this.writer.writeCharacters("</rdf:RDF>");
-		this.writer.writeEndDocument();
 	}
 
 }
