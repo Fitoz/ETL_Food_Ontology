@@ -3,7 +3,6 @@ package etl.test;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
@@ -107,56 +106,62 @@ public class ETLTest  {
 			if (tagname.equals("directions") || tagname.equals("ingredients") || tagname.equals("amt") || tagname.equals("head") || tagname.equals("categories")){
 				continue;
 			}
-			if (tagname.equals("recipe")){
-				this.writer.writeCharacters("\n");
-				this.setUriandName("fo", "Recipe", foUri, recipeElement);
-				this.writer.writeStartElement(foUri, "Recipe");
-				this.writer.writeCharacters("\n");
-			}
-			else if( tagname.equals( "title" ) ) {
-				this.writeRDFElement("foaf", "name", foafUri, recipeElement);
-			}
-			else if(tagname.equals("cat")){
-				this.writeRDFElement("ex", "category", exUri, recipeElement);
-			}
-			/*else if (tagname.equals("yield")){
-				this.writeRDFElement("ex", "yield", exUri, recipeElement);
-			}
-			else if (tagname.equals("ing")){
-				this.setUriandName("fo","Ingredient",foUri,ingElement);
-				recipeElement.appendElement(ingElement);
-			}
-			else if (tagname.equals("qty")){
-				String text=this.reader.getText();
-				ingElement.appendAttribute("fo", "quantity", text);
-			}
-			else if(tagname.equals("unit")){
-				String text;
-				if (this.reader.isStartElement()){
-					text=this.reader.getText();
-				}else {
-					text="no unit";
+			switch (tagname) {
+				case "recipe":
+					this.writer.writeCharacters("\n");
+					this.setUriandName("fo", "Recipe", foUri, recipeElement);
+					this.writer.writeStartElement(foUri, "Recipe");
+					this.writer.writeCharacters("\n");
+					break;
+				case "title":
+					this.writeRDFElement("foaf", "name", foafUri, recipeElement);
+					break;
+				case "cat":
+					this.writeRDFElement("ex", "category", exUri, recipeElement);
+					break;
+				case "yield":
+					this.writeRDFElement("ex", "yield", exUri, recipeElement);
+					break;
+				case "ing":
+					this.setUriandName("fo", "Ingredient", foUri, ingElement);
+					recipeElement.appendElement(ingElement);
+					break;
+				case "qty": {
+					String text = this.reader.getText();
+					ingElement.appendAttribute("fo", "quantity", text);
+					break;
 				}
-				ingElement.appendAttribute("fo","metric_quantity",text);
-			}
-			else if(tagname.equals("item")){
-				//Agrega los items al principio, pero en el xml aparecen al final
-				String text=this.reader.getText();
-				Attribute attribute=new Attribute("food",text,"fo");
-				ingElement.getAttributes().add(0,attribute);
-				ingElement.write(this.writer);
-				this.writer.writeCharacters("\n");
-				ingElement=new Element();
-			}*/
-			else if (tagname.equals("step")){
-				//this.writeRDFElement("fo","Step",foUri,recipeElement);
-				String text=this.reader.getText();
-				Element stepElement=new Element();
-				this.setUriandName("fo","Step",foUri,stepElement);
-				stepElement.appendAttribute("fo", "Instruction", text);
-				recipeElement.appendElement(stepElement);
-				stepElement.write(this.writer);
-				this.writer.writeCharacters("\n");
+				case "unit": {
+					String text;
+					if (this.reader.isStartElement()) {
+						text = this.reader.getText();
+					} else {
+						text = "no unit";
+					}
+					ingElement.appendAttribute("fo", "metric_quantity", text);
+					break;
+				}
+				case "item": {
+					//Agrega los items al principio, pero en el xml aparecen al final
+					String text = this.reader.getText();
+					Attribute attribute = new Attribute("food", text, "fo");
+					ingElement.getAttributes().add(0, attribute);
+					ingElement.write(this.writer);
+					this.writer.writeCharacters("\n");
+					ingElement = new Element();
+					break;
+				}
+				case "step": {
+					//this.writeRDFElement("fo","Step",foUri,recipeElement);
+					String text = this.reader.getText();
+					Element stepElement = new Element();
+					this.setUriandName("fo", "Step", foUri, stepElement);
+					stepElement.appendAttribute("fo", "Instruction", text);
+					recipeElement.appendElement(stepElement);
+					stepElement.write(this.writer);
+					this.writer.writeCharacters("\n");
+					break;
+				}
 			}
 		}
 		this.writer.writeCharacters("</rdf:RDF>");
