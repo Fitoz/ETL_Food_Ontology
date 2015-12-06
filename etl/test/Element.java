@@ -25,6 +25,10 @@ public class Element {
 		prefix = "";
 		text = "";
 	}
+
+	public String getPrefix() {
+		return prefix;
+	}
 	
 	public void write(XMLStreamWriter writer) throws XMLStreamException{
 		writer.setPrefix(prefix, uri);
@@ -37,7 +41,7 @@ public class Element {
 	
 	private void writeAttributes(XMLStreamWriter writer) throws XMLStreamException{
 		for(Attribute attribute : attributes){
-			writer.writeAttribute(attribute.getNameSpaceUri(), attribute.getLocalname(), attribute.getValue());
+			writer.writeAttribute(prefix,attribute.getNameSpaceUri(), attribute.getLocalname(), attribute.getValue());
 		}
 	}
 	
