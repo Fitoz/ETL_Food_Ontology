@@ -149,10 +149,11 @@ public class ETLTest  {
 					break;
 				}
 				case "step": {
-					String text = this.reader.getText();
+					String text1 = this.reader.getText();
+					System.out.println(text1);
 					Element stepElement = new Element();
 					this.setUriandName("fo", "Step", foUri, stepElement);
-					stepElement.appendAttribute("fo", "Instruction", text);
+					stepElement.appendAttribute("fo", "Instruction", text1);
 					recipeElement.appendElement(stepElement);
 					stepElement.write(this.writer);
 					this.writer.writeCharacters("\n");
@@ -160,6 +161,9 @@ public class ETLTest  {
 				}
 			}
 		}
+		this.writer.writeEndDocument();
+		this.writer.close();
+		this.reader.close();
 	}
 
 }
