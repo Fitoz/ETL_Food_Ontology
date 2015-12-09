@@ -1,4 +1,4 @@
-package etl.test.etl.test;
+package etl.test;
 
 import org.apache.commons.io.FileUtils;
 
