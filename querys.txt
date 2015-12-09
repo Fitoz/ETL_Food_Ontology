@@ -1,0 +1,168 @@
+#contar total recipes
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX fo: <http://purl.org/ontology/fo/>
+PREFIX ex: <http://example.org/>
+
+SELECT DISTINCT (COUNT (?name) as ?total_recipes)
+WHERE {?id foaf:name ?name.	
+}
+
+#los 10 ingredientes más usados
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX fo: <http://purl.org/ontology/fo/>
+PREFIX ex: <http://example.org/>
+
+SELECT DISTINCT ?Food_name (COUNT (?Food_name) as ?Total_appearing)
+
+WHERE {
+  ?id fo:Ingredient ?ind .
+    ?ind fo:food ?Food_name
+}
+GROUP BY ?Food_name
+ORDER BY DESC (?Total_appearing)
+LIMIT 10
+
+# 10 medidas más usadas
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX fo: <http://purl.org/ontology/fo/>
+PREFIX ex: <http://example.org/>
+
+SELECT DISTINCT (COUNT (?metric) as ?total_metric) ?metric
+WHERE {
+  ?id foaf:name ?name .
+  ?id fo:Ingredient ?ind .
+    ?ind fo:metric_quantity ?metric 
+}
+GROUP BY  ?metric 
+ORDER BY DESC (?total_metric)
+LIMIT 20
+
+#10 con más ingredientes
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX fo: <http://purl.org/ontology/fo/>
+PREFIX ex: <http://example.org/>
+
+SELECT DISTINCT (COUNT (?ind) as ?total_ingredient) ?name
+WHERE {
+  ?id foaf:name ?name .
+  ?id fo:Ingredient ?ind .
+}
+GROUP BY ?id ?name
+ORDER BY DESC (?total_ingredient)
+LIMIT 10
+
+#20 con más categorias
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX fo: <http://purl.org/ontology/fo/>
+PREFIX ex: <http://example.org/>
+
+SELECT DISTINCT (COUNT (?cat) as ?total_categories) ?name
+WHERE {
+  ?id foaf:name ?name .
+  ?id ex:category ?cat
+}
+GROUP BY ?id ?name
+ORDER BY DESC (?total_categories)
+LIMIT 20
+
+#20 categorías más comunes
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX fo: <http://purl.org/ontology/fo/>
+PREFIX ex: <http://example.org/>
+
+SELECT DISTINCT ?category (COUNT (?category) as ?total_appear)
+WHERE {
+  ?id foaf:name ?name .
+    ?id ex:category ?category
+}
+GROUP BY ?category
+ORDER BY DESC (?total_appear)
+LIMIT 20
+
+#20 medidas más comunes con sus unidades correspondientes
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX fo: <http://purl.org/ontology/fo/>
+PREFIX ex: <http://example.org/>
+
+SELECT (COUNT(?quan) as ?max_quan) ?quan ?quan_metric
+WHERE { ?id foaf:name ?name .
+  ?id fo:Ingredient ?ind .
+  ?ind fo:food ?food_name .
+    ?ind fo:quantity ?quan .
+  	?ind fo:metric_quantity ?quan_metric
+    FILTER (!regex(str(?quan),'no',"i"))
+  	FILTER (!regex(str(?quan_metric),'no',"i"))
+}
+GROUP BY ?quan ?quan_metric
+ORDER BY DESC (?max_quan)
+LIMIT 20
+
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX fo: <http://purl.org/ontology/fo/>
+PREFIX ex: <http://example.org/>
+
+#el ingrediente que tiene más "medida/cantidad" y su unidad.
+SELECT (MAX(?quan) as ?max_quan) ?food_name ?quan_metric
+WHERE { ?id foaf:name ?name .
+  ?id fo:Ingredient ?ind .
+  ?ind fo:food ?food_name .
+    ?ind fo:quantity ?quan .
+  ?ind fo:metric_quantity ?quan_metric
+    FILTER (!regex(str(?quan),'no',"i"))
+  FILTER (!regex(str(?quan),'p',"i"))
+  FILTER (!regex(str(?quan),'t',"i"))
+   FILTER (!regex(str(?quan),'f',"i"))
+}
+GROUP BY ?quan ?food_name ?quan_metric
+ORDER BY DESC (?max_quan)
+LIMIT 50
+
+#recetas con limon o limones
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX fo: <http://purl.org/ontology/fo/>
+PREFIX ex: <http://example.org/>
+
+SELECT DISTINCT ?name 
+WHERE {
+  ?id foaf:name ?name .
+  ?id fo:Ingredient ?ind .
+  {?ind fo:food "Lemon"}union{?ind fo:food "Lemons"}
+}
+
+#recetas con naranja o naranjas
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX fo: <http://purl.org/ontology/fo/>
+PREFIX ex: <http://example.org/>
+
+SELECT DISTINCT ?name 
+  WHERE {
+    ?id foaf:name ?name .
+    ?id fo:Ingredient ?ind .
+  {?ind fo:food "Orange"}union{?ind fo:food "Oranges"}}
+
+#recetas con manzana o manzanas
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX fo: <http://purl.org/ontology/fo/>
+PREFIX ex: <http://example.org/>
+
+SELECT DISTINCT ?name 
+  WHERE {
+    ?id foaf:name ?name .
+    ?id fo:Ingredient ?ind .
+  {?ind fo:food "Apple"}union{?ind fo:food "Apples"}}
+
+
+
+#recetas tipo "Desserts" con manzana (postres)
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX fo: <http://purl.org/ontology/fo/>
+PREFIX ex: <http://example.org/>
+
+SELECT DISTINCT ?name
+WHERE {
+  ?id foaf:name ?name .
+    ?id ex:category "Desserts".
+  ?id fo:Ingredient ?ind .
+   {?ind fo:food "Apple"}union{?ind fo:food "Apples"}	
+}
+
