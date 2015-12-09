@@ -1,4 +1,4 @@
-package etl.test.etl.test;
+package etl.test;
 public class Attribute {
 
 	String localname;
