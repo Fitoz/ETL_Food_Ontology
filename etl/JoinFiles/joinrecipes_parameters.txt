@@ -3,6 +3,6 @@ the head parameter must be the same, the others two are open.
 head =  <?xml version="1.0" ?><rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:fo="http://purl.org/ontology/fo/" xmlns:ex="http://example.org/" xmlns:dct="http://purl.org/dc/terms/" xmlns:frbrer="http://iflastandards.info/ns/fr/frbr/frbrer/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:foaf="http://xmlns.com/foaf/0.1/">
 
 
-file with the xml files= C:/Users/ravil_000/Documents/CC6202/proyect/Resultados
+folder with the xml files= C:/Users/ravil_000/Documents/CC6202/proyect/Resultados
 
 final file= C:/Users/ravil_000/Documents/CC6202/proyect/Resultados/test
